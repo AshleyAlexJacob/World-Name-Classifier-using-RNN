@@ -2,3 +2,4 @@
 __pycache*/
 .ruff_cache/
 poetry.lock
+artifacts/

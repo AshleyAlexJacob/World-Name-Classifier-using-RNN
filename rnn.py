@@ -7,7 +7,10 @@ from utils import (
     line_to_tensor,
     random_training_example,
 )
-
+import os
+from datetime import datetime
+import dagshub
+import mlflow
 
 class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -41,6 +44,10 @@ def train(rnn, line_tensor, category_tensor, criterion, optimizer):
 
     return output, loss.item()
 
+def save_model(model, name):
+    os.makedirs(f"artifacts/models", exist_ok=True)
+    torch.save(model.state_dict(), f"artifacts/models/{name}.pt")
+
 
 def category_from_output(output):
     category_idx = torch.argmax(output).item()
@@ -61,6 +68,8 @@ if __name__ == "__main__":
     category_lines, all_categories = load_data()
     n_categories = len(all_categories)
     n_hidden = 128
+    dagshub.init("World-Name-Classifier-using-RNN", "alexjacob260", mlflow=True)
+    
     rnn = RNN(N_LETTERS, n_hidden, n_categories)
 
     criterion = nn.NLLLoss()
@@ -70,38 +79,68 @@ if __name__ == "__main__":
     # training loop
     current_loss = 0
     all_losses = []
-    plot_steps, print_steps = 1000, 5000
-    n_iters = 100000
+    # plot_steps, print_steps = 1000, 5000
+    # n_iters = 100000
 
-    for i in range(n_iters):
-        category, line, category_tensor, line_tensor = random_training_example(
-            category_lines,
-            all_categories,
-        )
-        output, loss = train(rnn, line_tensor, category_tensor,
-                             criterion, optimizer)
-        current_loss = loss
-
-        if (i+1) % plot_steps==0:
-            all_losses.append(current_loss/plot_steps)
-            current_loss = 0
+    plot_steps, print_steps = 1, 5
+    n_iters = 10
+    last_loss = 0
+    mlflow.set_experiment('RNN_CLASSIFIER')
         
-        if (i+1) % print_steps==0:
-            guess = category_from_output(output)
-            correct = f"Correct {guess}" if guess == category else f"Wrong {category}"
-            print("f{i} {i/n_iters*100} {loss:.4f} {line}/{guess} {corect}")
-        
-    plt.figure()
-    plt.plot(all_losses)
-    plt.show()
+    with mlflow.start_run() as run:
+        for i in range(n_iters):
+            category, line, category_tensor, line_tensor = random_training_example(
+                category_lines,
+                all_categories,
+            )
+            output, loss = train(rnn, line_tensor, category_tensor,
+                                criterion, optimizer)
+            current_loss = loss
 
+            if i==(n_iters-1): last_loss = current_loss
+
+
+            if (i+1) % plot_steps==0:
+                all_losses.append(current_loss/plot_steps)
+                current_loss = 0
+            
+            if (i+1) % print_steps==0:
+                guess = category_from_output(output)
+                correct = f"Correct {guess}" if guess == category else f"Wrong {category}"
+                print("f{i} {i/n_iters*100} {loss:.4f} {line}/{guess} {corect}")
+
+            mlflow.log_metric("iterations",n_iters, step=i)
+            mlflow.log_metric("loss", loss, step=i)
+        
+            
+        # plt.figure()
+        # plt.plot(all_losses)
+        # plt.show()
+
+        current_utc_date = datetime.utcnow()
+        # save_model(rnn, f"classifier_{current_utc_date}")
+        
+        
+        mlflow.pytorch.log_model(rnn, "classifier_{current_utc_date}")
+        state_dict = rnn.state_dict()
+        mlflow.pytorch.log_state_dict(state_dict, artifact_path="model")
+        mlflow.log_param("lr", learning_rate)
+        mlflow.log_param("hidden size", n_hidden)
+            
+            
     
-    while True:
-        sentence = input("Input:\t")
-        if sentence=="exit":
-            break
+    print(f"run_id: {run.info.run_id}")
+    run_info = mlflow.get_run(run_id=run.info.run_id)
+    print(f"params: {run_info.data.params}")
+    print(f"metrics: {run_info.data.metrics}")
 
-        predict(sentence)
+
+    # while True:
+    #     sentence = input("Input:\t")
+    #     if sentence=="exit":
+    #         break
+
+    #     predict(rnn, sentence)
         
 
 
