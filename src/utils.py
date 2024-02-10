@@ -4,7 +4,9 @@ import os
 import unicodedata
 import string
 import glob
-
+from box import ConfigBox
+from box.exceptions import BoxValueError
+import yaml
 import torch
 import random
 
@@ -22,7 +24,7 @@ def unicode_to_ascii(s):
     )
 
 
-def load_data():
+def load_data(path):
     # Build the category_lines dictionary, a list of names per language
     category_lines = {}
     all_categories = []
@@ -35,7 +37,7 @@ def load_data():
         lines = io.open(filename, encoding="utf-8").read().strip().split("\n")
         return [unicode_to_ascii(line) for line in lines]
 
-    for filename in find_files("data/names/*.txt"):
+    for filename in find_files(f"{path}*.txt"):
         category = os.path.splitext(os.path.basename(filename))[0]
         all_categories.append(category)
 
@@ -77,6 +79,18 @@ def line_to_tensor(line):
     for i, letter in enumerate(line):
         tensor[i][0][letter_to_index(letter)] = 1
     return tensor
+
+
+def read_yaml(path: str) -> ConfigBox:
+    try:
+        with open(path) as yaml_file:
+            content = yaml.safe_load(yaml_file)
+            return ConfigBox(content)
+
+    except BoxValueError:
+        raise ValueError("Yaml File is Empty")
+    except Exception as e:
+        raise e
 
 
 def random_training_example(category_lines, all_categories):

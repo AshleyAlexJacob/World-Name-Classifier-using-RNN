@@ -1,0 +1,8 @@
+Metadata-Version: 2.1
+Name: src
+Version: 0.0.0
+Summary: Word Name Classifier, that classifies names based on nationalities
+Home-page: https://github.com/AshleyAlexJacob/World-Name-Classifier-using-RNN
+Author: AshleyAlexJacob
+Author-email: alexjacob260@gmail.com
+Project-URL: Bug Tracker, https://github.com/AshleyAlexJacob/World-Name-Classifier-using-RNN/issues
