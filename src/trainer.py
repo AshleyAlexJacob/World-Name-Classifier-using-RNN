@@ -14,6 +14,9 @@ from datetime import datetime
 class Trainer:
     def __init__(self, params, category_lines, all_categories):
         self.rnn = RNN(N_LETTERS, params.n_hidden, params.n_categories)
+        if torch.cuda.is_available():
+            print('Using Cuda')
+            self.rnn = self.rnn.to('cuda')
         self.all_categories = all_categories
         self.n_hidden = params.n_hidden
         self.category_lines = category_lines
@@ -27,6 +30,12 @@ class Trainer:
 
     def __train(self, line_tensor, category_tensor):
         hidden = self.rnn.init_hidden_layer()
+        
+        if torch.cuda.is_available():
+            line_tensor = line_tensor.to('cuda')
+            category_tensor = category_tensor.to('cuda')
+            hidden = hidden.to('cuda')
+            
         for i in range(line_tensor.size()[0]):
             output, hidden = self.rnn(line_tensor[i], hidden)
 
