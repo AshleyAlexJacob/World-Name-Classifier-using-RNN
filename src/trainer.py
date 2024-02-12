@@ -32,7 +32,6 @@ class Trainer:
         hidden = self.rnn.init_hidden_layer()
         
         if torch.cuda.is_available():
-            print('Inside cuda training loop')
             line_tensor = line_tensor.to('cuda')
             category_tensor = category_tensor.to('cuda')
             hidden = hidden.to('cuda')
@@ -50,7 +49,7 @@ class Trainer:
     def fit(self, config, params, visualize=False):
         current_loss = 0
         all_losses = []
-        mlflow.set_experiment("RNN_CLASSIFIER")
+        mlflow.set_experiment("RNN_CLASSIFIER_COLAB")
         with mlflow.start_run() as run:
             for i in range(params.iterations):
                 category, line, category_tensor, line_tensor = random_training_example(
