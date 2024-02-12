@@ -32,6 +32,7 @@ class Trainer:
         hidden = self.rnn.init_hidden_layer()
         
         if torch.cuda.is_available():
+            print('Inside cuda training loop')
             line_tensor = line_tensor.to('cuda')
             category_tensor = category_tensor.to('cuda')
             hidden = hidden.to('cuda')
@@ -43,6 +44,7 @@ class Trainer:
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        
         return output, loss.item()
 
     def fit(self, config, params, visualize=False):

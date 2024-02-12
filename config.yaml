@@ -1,5 +1,5 @@
-plot_steps: 1000
-print_steps: 5000
+plot_steps: 1
+print_steps: 5
 
 # path of data can go here
 data: "data/names/"
