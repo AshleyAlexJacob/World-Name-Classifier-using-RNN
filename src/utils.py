@@ -106,11 +106,18 @@ def random_training_example(category_lines, all_categories):
 
 
 if __name__ == "__main__":
-    print(ALL_LETTERS)
-    print(unicode_to_ascii("Ślusàrski"))
+    # print(ALL_LETTERS)
+    # print(unicode_to_ascii("Ślusàrski"))
 
-    category_lines, all_categories = load_data()
-    print(category_lines["Arabic"][:5])
+    category_lines, all_categories = load_data("data/names/")
+    # print(category_lines["Arabic"][:5])
 
-    print(letter_to_tensor("J"))  # [1, 57]
-    print(line_to_tensor("Jones").size())  # [5, 1, 57]
+    # print(letter_to_tensor("J"))  # [1, 57]
+    # print(line_to_tensor("Jones").size())  # [5, 1, 57]
+    print(category_lines)
+    # category, line, category_tensor, line_tensor = random_training_example(
+    #     category_lines,
+    #     all_categories,
+    # )
+
+    # print(category_tensor.shape, line_tensor.shape)
