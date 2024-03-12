@@ -22,9 +22,10 @@ class Predict:
         with torch.no_grad():
             line_tensor = line_to_tensor(input_line)
             hidden = self.model.init_hidden_layer()
+            hidden.to(self.device)
+            line_tensor.to(self.device)
             for i in range(line_tensor.size()[0]):
                 output, hidden = self.model(line_tensor[i], hidden)
-
             guess = self.category_from_output(output)
             print(f"Guess: {guess}")
 

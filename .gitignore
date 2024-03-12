@@ -3,6 +3,6 @@ __pycache*/
 .ruff_cache/
 poetry.lock
 
-# .env
+.env
 
 src/evaluator.py
